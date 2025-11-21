@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Signed In</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="card">
+    <div class="profile-row">
+      {% if user.picture %}
+        <img src="{{ user.picture }}" alt="Profile" class="avatar">
+      {% endif %}
+      <div class="profile-text">
+        <h2>Hello {{ user.name }} <a class="signout" href="{{ url_for('routes.logout') }}">[Sign out]</a></h2>
+        <p class="muted">You are signed in with the email <strong>{{ user.email }}</strong></p>
+        <p><strong>Current Indian Time:</strong> {{ current_time }}</p>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <h3>Phase 2: Printing Design</h3>
+
+  <form method="POST" action="{{ url_for('routes.design') }}">
+    <label for="lines">Number of Lines:</label>
+    <input type="number" id="lines" name="lines" min="1" max="100" required>
+    <button type="submit">Display</button>
+  </form>
+
+  {% if output %}
+  <div class="output-container">
+    <pre class="pattern">
+{% for line in output %}
+{{ line }}
+{% endfor %}
+    </pre>
+  </div>
+  {% endif %}
+</body>
+</html>
