@@ -5,7 +5,6 @@ from app.oauth import create_flow, verify_id_token
 
 bp = Blueprint('routes', __name__)
 
-# -------------------- Routes -------------------- #
 
 @bp.route('/')
 def index():
@@ -53,43 +52,43 @@ def logout():
     return redirect(url_for('routes.index'))
 
 
-# -------------------- Pattern Design Logic -------------------- #
 
-def build_raw_pattern(lines):
-    base = "FORMULAQSOLUTIONS"
-    n = len(base)
-    result = []
+BASE = "FORMULAQSOLUTIONS"
 
-    for i in range(lines):
-        left = base[i % n]
-        right = base[(n - 1 - i) % n]
+def generate_diamond_pattern(lines):
+    word = BASE
+    n = len(word)
+    half = lines // 2
 
-        if i % 2 == 0:
-            hyphens = 0
-        else:
-            hyphens = 2 * i - 1 if i < lines // 2 else 2 * (lines - i) - 1
+    pattern = []
 
-        if hyphens <= 0:
-            line = left + right if left != right else left
-        else:
-            line = left + ("-" * hyphens) + right
+    for m in range(0, half + 1):
+        start = (2 * m) % n
+        L = 1 + 4 * min(m, half - m)
 
-        result.append(line)
+        substring = ''.join(word[(start + j) % n] for j in range(L))
+        pattern.append(substring)
 
-    return result
+        if m < half:
+            left_idx = (2 * m + 1) % n
+            h = 4 * min(m, (half - 1) - m) + 1
+            right_idx = (left_idx + h + 1) % n
 
+            pair_line = (
+                word[left_idx] +
+                ("-" * h) +
+                word[right_idx]
+            )
+            pattern.append(pair_line)
 
-def generate_pattern_centered(lines):
-    raw = build_raw_pattern(lines)
-    max_len = max((len(s) for s in raw), default=0)
-    centered = [(" " * ((max_len - len(line)) // 2) + line) for line in raw]
-    return centered
+    return pattern
+
 
 
 @bp.route('/design', methods=['POST'])
 def design():
     if 'user' not in session:
-        return redirect(url_for('routes.index'))  # user not logged in
+        return redirect(url_for('routes.index'))
 
     try:
         lines = int(request.form.get('lines', '0'))
@@ -99,7 +98,7 @@ def design():
     if not (1 <= lines <= 100):
         output = ["Please enter a number between 1 and 100."]
     else:
-        output = generate_pattern_centered(lines)
+        output = generate_diamond_pattern(lines)
 
     user = session.get('user')
     india_tz = pytz.timezone('Asia/Kolkata')
